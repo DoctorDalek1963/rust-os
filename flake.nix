@@ -34,7 +34,10 @@
           overlays = [(import inputs.rust-overlay)];
         };
 
-        rustToolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default);
+        rustToolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain:
+          toolchain.default.override {
+            extensions = ["rust-src" "llvm-tools-preview"];
+          });
 
         craneLib = (inputs.crane.mkLib pkgs).overrideToolchain rustToolchain;
 
@@ -48,11 +51,16 @@
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
       in rec {
         devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [
-            (rustToolchain.override {
-              extensions = ["rust-analyzer" "rust-src" "rust-std"];
-            })
-          ];
+          nativeBuildInputs =
+            [
+              (rustToolchain.override {
+                extensions = ["rust-src" "llvm-tools-preview" "rust-analyzer"];
+              })
+            ]
+            ++ (with pkgs; [
+              cargo-bootimage
+              qemu
+            ]);
           shellHook = ''
             ${config.pre-commit.installationScript}
             export RUST_BACKTRACE=1
