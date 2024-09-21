@@ -7,10 +7,4 @@ repository = "https://github.com/DoctorDalek1963/rust-os"
 license = "GPL-3.0-only"
 publish = false
 
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
-
 [dependencies]
