@@ -1,7 +1,31 @@
 //! This module provides an abstraction for working with VGA hardware buffers.
 
 use core::fmt;
+use lazy_static::lazy_static;
+use spin::Mutex;
 use volatile::Volatile;
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> =
+        Mutex::new(Writer::new(ColorCode::new(Color::White, Color::Black)));
+}
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    use core::fmt::Write;
+    WRITER.lock().write_fmt(args).unwrap();
+}
 
 /// One of the 16 colors used by VGA characters.
 #[allow(dead_code)]
