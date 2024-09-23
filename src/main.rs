@@ -10,8 +10,10 @@
 #[cfg(test)]
 pub mod test_infra;
 
+mod serial;
 mod vga_buffer;
 
+#[cfg(not(test))]
 #[panic_handler]
 fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     println!("{info}");
